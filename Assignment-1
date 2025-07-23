@@ -1,1 +1,242 @@
+# from OpenGL.GL import *
+# from OpenGL.GLUT import *
+# from OpenGL.GLU import *
+# import random
+# import math
+# W_Width, W_Height = 500, 500
+# RAIN_COUNT = 100
+# rain_drops = []
+# rain_angle = 0.0
+# bg_color = 0.0  # 0 (night) to 1 (day)
+# def drawHouse():
+#     # bashar chaad
+#     glBegin(GL_TRIANGLES)
+#     glColor3f(0.7, 0.2, 0.2)
+#     glVertex2f(-100, 70)
+#     glVertex2f(100, 70)
+#     glVertex2f(0, 130)
+#     glEnd()
+#     # Bbashar deyal
+#     glBegin(GL_TRIANGLES)
+#     glColor3f(0.8, 0.7, 0.5)
+#     glVertex2f(-80, 70)
+#     glVertex2f(80, 70)
+#     glVertex2f(80, -70)
+#     glVertex2f(-80, 70)
+#     glVertex2f(80, -70)
+#     glVertex2f(-80, -70)
+#     glEnd()
+#      #dorja
+#     glBegin(GL_TRIANGLES)
+#     glColor3f(0.4, 0.2, 0.1)
+#     glVertex2f(-20, -70)
+#     glVertex2f(20, -70)
+#     glVertex2f(20, 0)
+#     glVertex2f(-20, -70)
+#     glVertex2f(20, 0)
+#     glVertex2f(-20, 0)
+#     glEnd()
+#     # janala
+#     glBegin(GL_TRIANGLES)
+#     glColor3f(0.2, 0.5, 0.8)
+#     # Left window
+#     glVertex2f(-60, 10)
+#     glVertex2f(-45, 10)
+#     glVertex2f(-45, 25)
+#     glVertex2f(-60, 10)
+#     glVertex2f(-45, 25)
+#     glVertex2f(-60, 25)
+#     # Right window
+#     glVertex2f(45, 10)
+#     glVertex2f(60, 10)
+#     glVertex2f(60, 25)
+#     glVertex2f(45, 10)
+#     glVertex2f(60, 25)
+#     glVertex2f(45, 25)
+#     glEnd()
+# def drawRain():
+#     glColor3f(0.5, 0.5, 1.0)
+#     glBegin(GL_LINES)
+#     dx = 5 * math.sin(math.radians(rain_angle))
+#     dy = -10
+#     for x, y in rain_drops:
+#         glVertex2f(x, y)
+#         glVertex2f(x + dx, y + dy)
+#     glEnd()
+# def keyboardListener(key, x, y):
+#     global bg_color
+#     if key == b'm':
+#         bg_color = min(bg_color + 0.05, 1.0)
+#     elif key == b'n':
+#         bg_color = max(bg_color - 0.05, 0.0)
+#     glutPostRedisplay()
+# def specialKeyListener(key, x, y):
+#     global rain_angle
+#     if key == GLUT_KEY_LEFT:
+#         rain_angle -= 0.5
+#     elif key == GLUT_KEY_RIGHT:
+#         rain_angle += 0.5
+#     glutPostRedisplay()
+# def display():
+#     glClearColor(bg_color, bg_color, bg_color, 1.0)
+#     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+#     glMatrixMode(GL_MODELVIEW)
+#     glLoadIdentity()
+#     gluLookAt(0, 0, 200, 0, 0, 0, 0, 1, 0)
+#     drawHouse()
+#     drawRain()
+#     glutSwapBuffers()
+# def animate():
+#     dx = 1 * math.sin(math.radians(rain_angle))
+#     dy = -5
+#     for drop in rain_drops:
+#         drop[0] += dx
+#         drop[1] += dy
+#         if drop[1] < -260 or drop[0] < -260 or drop[0] > 260:
+#             drop[1] = 260
+#             drop[0] = random.uniform(-250, 250)
+#     glutPostRedisplay()
+# def init():
+#     glClearColor(0, 0, 0, 0)
+#     glMatrixMode(GL_PROJECTION)
+#     glLoadIdentity()
+#     gluPerspective(104, 1, 1, 1000.0)
+#     for _ in range(RAIN_COUNT):
+#         x = random.uniform(-200, 200)
+#         y = random.uniform(-200, 200)
+#         rain_drops.append([x, y])
+
+# glutInit()
+# glutInitWindowSize(W_Width, W_Height)
+# glutInitWindowPosition(0, 0)
+# glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB)
+# glutCreateWindow(b"OpenGL House in Rain")
+# init()
+# glutDisplayFunc(display)
+# glutIdleFunc(animate)
+# glutKeyboardFunc(keyboardListener)
+# glutSpecialFunc(specialKeyListener)
+# glutMainLoop()
+
+
+
+
+###########################TASK02#############
+from OpenGL.GL import *
+from OpenGL.GLUT import *
+from OpenGL.GLU import *
+import random
+import time
+window_width, window_height = 800, 600
+BOX_MIN_X, BOX_MAX_X = -400, 400
+BOX_MIN_Y, BOX_MAX_Y = -300, 300
+points = []
+speed = 1.0
+blinking = False
+frozen = False
+blink_time = 0
+class MovingPoint:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.color = (random.random(),random.random(),random.random() 
+        )
+        self.dx = random.choice([-2,2]) * random.uniform(2, 4)
+        self.dy = random.choice([-2,2]) * random.uniform(2, 4)
+        self.visible = True
+def init():
+    glViewport(0, 0, window_width, window_height)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    glOrtho(BOX_MIN_X, BOX_MAX_X, BOX_MIN_Y, BOX_MAX_Y, 0.0, 1.0)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+def convert_coordinate(x, y):
+    gl_x = x - (window_width / 2)
+    gl_y = (window_height / 2) - y
+    return gl_x, gl_y
+def create_point(x, y):
+    points.append(MovingPoint(x, y))
+def update_points():
+    global speed   
+    if not frozen:
+        for point in points:
+            point.x += point.dx * speed
+            point.y += point.dy * speed
+            if point.x > BOX_MAX_X or point.x < BOX_MIN_X:
+                point.dx *= -1
+                point.x = max(BOX_MIN_X, min(BOX_MAX_X, point.x))              
+            if point.y > BOX_MAX_Y or point.y < BOX_MIN_Y:
+                point.dy *= -1
+                point.y = max(BOX_MIN_Y, min(BOX_MAX_Y, point.y))
+
+def draw_points():
+    global blinking, blink_time  
+    current_time = time.time()
+    should_blink = False
+    
+    if blinking:
+        should_blink = int(current_time / 0.6) % 2 == 0 
+    glPointSize(8)
+    glBegin(GL_POINTS)    
+    for point in points:
+        if blinking:
+            point.visible = not should_blink
+        else:
+            point.visible = True          
+        if point.visible:
+            glColor3f(*point.color)
+            glVertex2f(point.x, point.y)    
+    glEnd()
+def draw_boundary():
+    glColor3f(1.0, 1.0, 1.0)
+    glLineWidth(2.0)
+    glBegin(GL_LINE_LOOP)
+    glVertex2f(BOX_MIN_X, BOX_MIN_Y)
+    glVertex2f(BOX_MAX_X, BOX_MIN_Y)
+    glVertex2f(BOX_MAX_X, BOX_MAX_Y)
+    glVertex2f(BOX_MIN_X, BOX_MAX_Y)
+    glEnd()
+def display():
+    glClearColor(0.0, 0.0, 0.0, 1.0)
+    glClear(GL_COLOR_BUFFER_BIT)
+    draw_boundary()
+    draw_points()
+    glutSwapBuffers()
+def keyboard(key, x, y):
+    global frozen
+    if key == b' ':
+        frozen = not frozen
+    glutPostRedisplay()
+def special_keys(key, x, y):
+    global speed 
+    if not frozen:
+        if key == GLUT_KEY_UP:
+            speed *= 1.1
+        elif key == GLUT_KEY_DOWN:
+            speed = max(0.1, speed / 1.1)
+    glutPostRedisplay()
+def mouse(button, state, x, y):
+    global blinking  
+    if button == GLUT_RIGHT_BUTTON and state == GLUT_DOWN:
+        gl_x, gl_y = convert_coordinate(x, y)
+        if (BOX_MIN_X <= gl_x <= BOX_MAX_X and 
+            BOX_MIN_Y <= gl_y <= BOX_MAX_Y):
+            create_point(gl_x, gl_y)    
+    elif button == GLUT_LEFT_BUTTON and state == GLUT_DOWN:
+        blinking = not blinking   
+    glutPostRedisplay()
+
+glutInit()
+glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE)
+glutInitWindowSize(window_width, window_height)
+glutCreateWindow(b"Improved Bouncing Points")   
+init()   
+glutDisplayFunc(display)
+glutIdleFunc(lambda: (update_points(), glutPostRedisplay()))
+glutKeyboardFunc(keyboard)
+glutSpecialFunc(special_keys)
+glutMouseFunc(mouse)    
+glutMainLoop()
+
 
